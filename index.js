@@ -17,21 +17,28 @@ const getPosts = async (user) => {
 const getCommentsForEachPost = async (posts) => {
   const res = await Promise.all(posts.map(post => 
     fetch(`${url}/comments?postId=${post.id}&_limit=2`)  
-  ))
+  ));
   const postComments = await Promise.all(res.map(r => r.json()));
-  
-  postComments.forEach((comments, i) => posts[i].comments = comments);
-}
 
+  return postComments; // Devuelve los comentarios
+}
 
 const getBlogContent = async () => {
   try {
     const user = await getUser(1);
     const posts = await getPosts(user);
-    await getCommentsForEachPost(posts);
+    const postComments = await getCommentsForEachPost(posts);
 
-    console.log(user);
-    console.log(posts);
+    posts.forEach(post => {
+      content.innerHTML += `
+      <div class="post">
+      <h4>${post.title}</h4>
+      <p>${post.body}</p>
+      <br>
+      ${postComments[posts.indexOf(post)].map(c => `<p><span>${c.email}:</span>${c.body}</p>`).join('')}
+      </div>
+      `;
+    });
   } catch (err) {
     console.log(err);
   }
